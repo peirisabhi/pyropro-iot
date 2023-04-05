@@ -13,6 +13,9 @@ const char* mqtt_server = "13.50.105.25";
 #define DHTPIN 5
 #define DHTTYPE DHT11
 
+// Flame Sensor
+int flameSensor = 4; 
+
 DHT dht(DHTPIN, DHTTYPE);
 
 WiFiClient espClient;
@@ -92,6 +95,7 @@ void reconnect() {
 
 void setup() {
   pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
+  // pinMode(flameSensor, INPUT);
   Serial.begin(115200);
   setup_wifi();
   client.setServer(mqtt_server, 1883);
@@ -105,6 +109,10 @@ void loop() {
     reconnect();
   }
   client.loop();
+
+
+  // int flameDetected = digitalRead(flameSensor);
+  // Serial.println(flameDetected);
 
   
 

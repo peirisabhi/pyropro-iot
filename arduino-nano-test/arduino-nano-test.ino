@@ -13,6 +13,9 @@ int flameSensor = 4;
 int gasSensorD = 3;
 int gasSensorA = 0;
 
+// soil mositure sensor
+int soilMoisture = 1;
+
 unsigned long lastMsg = 0;
 int value = 0;
 
@@ -42,7 +45,7 @@ if (now - lastMsg > 500) {
     int gasDetected = digitalRead(gasSensorD);
     int gasValue = analogRead(gasSensorA);
 
-
+    int soilMoistureValue = analogRead(analogRead);
 
     DynamicJsonDocument doc(1024);
 
@@ -53,20 +56,13 @@ if (now - lastMsg > 500) {
     doc["flame_detected"] = flameDetected;
     doc["gas_detected"] = gasDetected;
     doc["gas_value"] = gasValue;
+    doc["soil_moisture_value"] = soilMoistureValue;
 
     
-    // char json[] = serializeJson(doc, Serial);
-    // Serial.print(data);
-    	
+
     char data[256];
     serializeJson(doc, data);
     Serial.println(data);
-
-    // snprintf (msg, MSG_BUFFER_SIZE, "hello world #%ld", value);
-    // Serial.print("Publish message: ");
-    // Serial.println(msg);
-    // client.publish("sensor-data", data);
-
     
 
   }

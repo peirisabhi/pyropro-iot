@@ -1,14 +1,34 @@
 #include "DHT.h"
 #include <ArduinoJson.h>
+#include <Wire.h>
+#include <Adafruit_BMP085.h>
+#include <WiFi.h>
+#include <PubSubClient.h>
 
-// DHT
+// define the sea level pressure
+#define seaLevelPressure_hPa 1013.25
+
+// DHT11 Sensor
 #define DHTPIN 33     
 #define DHTTYPE DHT11   
 DHT dht(DHTPIN, DHTTYPE);
 
+
 // MQ7 gas sensor
 int gasSensorD = 32;
 int gasSensorA = 35;
+
+
+// Flame Sensor
+int flameSensor = 34; 
+
+
+// Soil moisture sensor
+int soilMoistureD = 25;
+
+
+
+Adafruit_BMP085 bmp;
 
 void setup() {
   Serial.begin(9600);
@@ -16,7 +36,13 @@ void setup() {
 
   dht.begin();
 
+  if (!bmp.begin()) {
+    Serial.println("BMP180 Not Found. CHECK CIRCUIT!");
+    while (1) {}
+  }
+
   pinMode(gasSensorD, INPUT);
+  pinMode(flameSensor, INPUT);
 }
 
 void loop() {
@@ -45,6 +71,18 @@ void loop() {
   int gasDetected = digitalRead(gasSensorD);
     int gasValue = analogRead(gasSensorA);
 
+    int flameDetected = digitalRead(flameSensor);
+
+  int soilMoistureValue= analogRead(soilMoistureD);
+  soilMoistureValue = map(soilMoistureValue,550,0,0,100);
+
+
+  int bmpTemperature = bmp.readTemperature();
+  int bmpPressure = bmp.readPressure();
+  int bmpSealevelPressure = bmp.readSealevelPressure();
+  int bmpAltitude = bmp.readAltitude();
+  int bmpAltitudeWithSealevelPressure = bmp.readAltitude(seaLevelPressure_hPa * 100);
+
 
   Serial.print(F("Humidity: "));
   Serial.print(h);
@@ -62,5 +100,29 @@ void loop() {
   Serial.print(gasDetected);
 
   Serial.print(F(" gasValue:"));
-  Serial.println(gasValue);
+  Serial.print(gasValue);
+
+  Serial.print(F(" flameDetected:"));
+  Serial.print(flameDetected);
+
+  Serial.print(F(" soilMoistureValue:"));
+  Serial.print(soilMoistureValue);
+
+  Serial.print(F(" soilMoistureValue:"));
+  Serial.print(soilMoistureValue);
+
+  Serial.print(F(" bmpTemperature:"));
+  Serial.print(bmpTemperature);
+
+  Serial.print(F(" bmpPressure:"));
+  Serial.print(bmpPressure);
+
+  Serial.print(F(" bmpSealevelPressure:"));
+  Serial.print(bmpSealevelPressure);
+
+  Serial.print(F(" bmpAltitudeWithSealevelPressure:"));
+  Serial.print(bmpAltitudeWithSealevelPressure);
+
+  Serial.print(F(" bmpAltitude:"));
+  Serial.println(bmpAltitude);
 }

@@ -25,7 +25,7 @@ int flameSensor = 34;
 
 
 // Soil moisture sensor
-int soilMoistureD = 25;
+int soilMoistureA = 25;
 
 
 // buzzer
@@ -154,6 +154,13 @@ void Task1code(void* pvParameters) {
 
 
 void setup() {
+pinMode(buzzer, OUTPUT);
+
+  digitalWrite(buzzer, HIGH);
+  delay(1000);
+  digitalWrite(buzzer, LOW);
+
+
   Serial.begin(9600);
 
   setup_wifi();
@@ -173,8 +180,7 @@ void setup() {
   pinMode(gasSensorD, INPUT);
   pinMode(flameSensor, INPUT);
   pinMode(rainD, INPUT);
-  pinMode(buzzer, OUTPUT);
-
+  
   attachInterrupt(digitalPinToInterrupt(27), rpm_fun, RISING);
 
 
@@ -239,7 +245,7 @@ void publishData(int fire) {
 
   int rainDetected = digitalRead(rainD);
 
-  float soilMoistureValue = analogRead(soilMoistureD);
+  float soilMoistureValue = analogRead(soilMoistureA);
   soilMoistureValue = map(soilMoistureValue, 550, 0, 0, 100);
 
 

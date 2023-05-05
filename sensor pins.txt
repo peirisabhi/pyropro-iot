@@ -1,0 +1,13 @@
+dht11 green
+flame sensor do white
+
+bmp180 scl yellow, sda orrange
+mq7 do ash, ao blue
+
+solar +white, -black
+cam +red, -brown
+
+rain sensor do white
+soil moisture AO orrange
+
+

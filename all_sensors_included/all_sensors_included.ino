@@ -9,8 +9,8 @@
 #define seaLevelPressure_hPa 1013.25
 
 // DHT11 Sensor
-#define DHTPIN 33     
-#define DHTTYPE DHT11   
+#define DHTPIN 33
+#define DHTTYPE DHT11
 DHT dht(DHTPIN, DHTTYPE);
 
 
@@ -20,28 +20,35 @@ int gasSensorA = 35;
 
 
 // Flame Sensor
-int flameSensor = 34; 
+int flameSensor = 34;
 
 
 // Soil moisture sensor
 int soilMoistureD = 25;
 
 
+// buzzer
+int buzzer = 4;
+
+
+// rain sensor
+int rainD = 26;
+
 Adafruit_BMP085 bmp;
 
 
 
-// const char* ssid = "SLT_FIBRE";
-const char* ssid = "Sahan prenando";
-// const char* password = "Sheeba@#1212";
-const char* password = "sahan123";
+const char* ssid = "SLT_FIBRE";
+// const char* ssid = "Sahan prenando";
+const char* password = "Sheeba@#1212";
+// const char* password = "sahan123";
 const char* mqtt_server = "13.50.105.25";
 
 
 WiFiClient espClient;
 PubSubClient client(espClient);
 unsigned long lastMsg = 0;
-#define MSG_BUFFER_SIZE	(256)
+#define MSG_BUFFER_SIZE (256)
 char msg[MSG_BUFFER_SIZE];
 int value = 0;
 
@@ -88,7 +95,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
   } else {
     // digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
   }
-
 }
 
 
@@ -136,10 +142,12 @@ void setup() {
 
   pinMode(gasSensorD, INPUT);
   pinMode(flameSensor, INPUT);
+  pinMode(rainD, INPUT);
+  pinMode(buzzer, OUTPUT);
 }
 
 void loop() {
-  
+
 
   if (!client.connected()) {
     reconnect();
@@ -148,91 +156,111 @@ void loop() {
 
   // delay(3000);
 
-   unsigned long now = millis();
+  unsigned long now = millis();
   if (now - lastMsg > 2000) {
     lastMsg = now;
     ++value;
 
-  // Reading temperature or humidity takes about 250 milliseconds!
-  // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
-  float humidity = dht.readHumidity();
-  // Read temperature as Celsius (the default)
-  float temperature = dht.readTemperature();
-  // Read temperature as Fahrenheit (isFahrenheit = true)
-  float f = dht.readTemperature(true);
+    // Reading temperature or humidity takes about 250 milliseconds!
+    // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)
+    float humidity = dht.readHumidity();
+    // Read temperature as Celsius (the default)
+    float temperature = dht.readTemperature();
+    // Read temperature as Fahrenheit (isFahrenheit = true)
+    float f = dht.readTemperature(true);
 
-  // Check if any reads failed and exit early (to try again).
-  // if (isnan(h) || isnan(t) || isnan(f)) {
-  //   Serial.println(F("Failed to read from DHT sensor!"));
-  //   return;
-  // }
+    // Check if any reads failed and exit early (to try again).
+    // if (isnan(h) || isnan(t) || isnan(f)) {
+    //   Serial.println(F("Failed to read from DHT sensor!"));
+    //   return;
+    // }
 
-  // Compute heat index in Fahrenheit (the default)
-  // float hif = dht.computeHeatIndex(f, h);
-  // Compute heat index in Celsius (isFahreheit = false)
-  float heatIndex = dht.computeHeatIndex(temperature, humidity, false);
+    // Compute heat index in Fahrenheit (the default)
+    // float hif = dht.computeHeatIndex(f, h);
+    // Compute heat index in Celsius (isFahreheit = false)
+    float heatIndex = dht.computeHeatIndex(temperature, humidity, false);
 
-  int gasDetected = digitalRead(gasSensorD);
-  float gasValue = analogRead(gasSensorA);
+    int gasDetected = digitalRead(gasSensorD);
+    float gasValue = analogRead(gasSensorA);
 
-  int flameDetected = digitalRead(flameSensor);
+    int flameDetected = digitalRead(flameSensor);
 
-  float soilMoistureValue= analogRead(soilMoistureD);
-  soilMoistureValue = map(soilMoistureValue,550,0,0,100);
+    int rainDetected = digitalRead(rainD);
 
-
-  float bmpTemperature = bmp.readTemperature();
-  float bmpPressure = bmp.readPressure();
-  float bmpSealevelPressure = bmp.readSealevelPressure();
-  float bmpAltitude = bmp.readAltitude();
-  float bmpAltitudeWithSealevelPressure = bmp.readAltitude(seaLevelPressure_hPa * 100);
+    float soilMoistureValue = analogRead(soilMoistureD);
+    soilMoistureValue = map(soilMoistureValue, 550, 0, 0, 100);
 
 
-  // Serial.print(F("Humidity: "));
-  // Serial.print(h);
-  // Serial.print(F("%  Temperature: "));
-  // Serial.print(t);
-  // Serial.print(F("°C "));
-  // Serial.print(f);
-  // Serial.print(F("°F  Heat index: "));
-  // Serial.print(hic);
-  // Serial.print(F("°C "));
-  // Serial.print(hif);
-  // Serial.print(F("°F"));
-
-  // Serial.print(F(" gasDetected:"));
-  // Serial.print(gasDetected);
-
-  // Serial.print(F(" gasValue:"));
-  // Serial.print(gasValue);
-
-  // Serial.print(F(" flameDetected:"));
-  // Serial.print(flameDetected);
-
-  // Serial.print(F(" soilMoistureValue:"));
-  // Serial.print(soilMoistureValue);
-
-  // Serial.print(F(" soilMoistureValue:"));
-  // Serial.print(soilMoistureValue);
-
-  // Serial.print(F(" bmpTemperature:"));
-  // Serial.print(bmpTemperature);
-
-  // Serial.print(F(" bmpPressure:"));
-  // Serial.print(bmpPressure);
-
-  // Serial.print(F(" bmpSealevelPressure:"));
-  // Serial.print(bmpSealevelPressure);
-
-  // Serial.print(F(" bmpAltitudeWithSealevelPressure:"));
-  // Serial.print(bmpAltitudeWithSealevelPressure);
-
-  // Serial.print(F(" bmpAltitude:"));
-  // Serial.println(bmpAltitude);
+    float bmpTemperature = bmp.readTemperature();
+    float bmpPressure = bmp.readPressure();
+    float bmpSealevelPressure = bmp.readSealevelPressure();
+    float bmpAltitude = bmp.readAltitude();
+    float bmpAltitudeWithSealevelPressure = bmp.readAltitude(seaLevelPressure_hPa * 100);
 
 
+    // Serial.print(F("Humidity: "));
+    // Serial.print(h);
+    // Serial.print(F("%  Temperature: "));
+    // Serial.print(t);
+    // Serial.print(F("°C "));
+    // Serial.print(f);
+    // Serial.print(F("°F  Heat index: "));
+    // Serial.print(hic);
+    // Serial.print(F("°C "));
+    // Serial.print(hif);
+    // Serial.print(F("°F"));
 
-  DynamicJsonDocument doc(1024);
+    // Serial.print(F(" gasDetected:"));
+    // Serial.print(gasDetected);
+
+    // Serial.print(F(" gasValue:"));
+    // Serial.print(gasValue);
+
+    // Serial.print(F(" flameDetected:"));
+    // Serial.print(flameDetected);
+
+    // Serial.print(F(" soilMoistureValue:"));
+    // Serial.print(soilMoistureValue);
+
+    // Serial.print(F(" soilMoistureValue:"));
+    // Serial.print(soilMoistureValue);
+
+    // Serial.print(F(" bmpTemperature:"));
+    // Serial.print(bmpTemperature);
+
+    // Serial.print(F(" bmpPressure:"));
+    // Serial.print(bmpPressure);
+
+    // Serial.print(F(" bmpSealevelPressure:"));
+    // Serial.print(bmpSealevelPressure);
+
+    // Serial.print(F(" bmpAltitudeWithSealevelPressure:"));
+    // Serial.print(bmpAltitudeWithSealevelPressure);
+
+    // Serial.print(F(" bmpAltitude:"));
+    // Serial.println(bmpAltitude);
+
+    if (gasDetected == 1) {
+      gasDetected = 0;
+    } else {
+      gasDetected = 1;
+    }
+
+    if (flameDetected == 1) {
+      flameDetected = 0;
+    } else {
+      flameDetected = 1;
+    }
+
+
+    if (rainDetected == 1) {
+      rainDetected = 0;
+    } else {
+      rainDetected = 1;
+    }
+
+
+    DynamicJsonDocument doc(1024);
 
     doc["temp"] = temperature;
     doc["humi"] = humidity;
@@ -246,17 +274,23 @@ void loop() {
     doc["bmp_slp"] = bmpSealevelPressure;
     doc["bmp_alti"] = bmpAltitude;
     doc["bmp_alti_slp"] = bmpAltitudeWithSealevelPressure;
+    doc["rain"] = rainDetected;
     doc["time"] = now;
+    doc["device_id"] = "D001";
 
 
     char data[256];
     serializeJson(doc, data);
     Serial.print(data);
 
-    snprintf (msg, MSG_BUFFER_SIZE, "hello world #%ld", value);
+    snprintf(msg, MSG_BUFFER_SIZE, "hello world #%ld", value);
     Serial.print("Publish message: ");
     Serial.println(data);
     client.publish("sensor-data", data);
 
+    digitalWrite(buzzer, HIGH);
+    delay(100);
+    digitalWrite(buzzer, LOW);
+    delay(100);
   }
 }
